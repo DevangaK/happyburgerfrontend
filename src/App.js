@@ -1,12 +1,12 @@
+import logo from './logo.svg';
 import './App.css';
-import BurgerDetails from './components/BurgerDetails'
-
+import Form from './component/Form';
 
 function App() {
   return (
-    <div className="App">
-      <BurgerDetails/>
-    </div>
+    <>
+    <Form/>
+    </>
   );
 }
 
