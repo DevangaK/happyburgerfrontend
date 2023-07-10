@@ -10,20 +10,20 @@ import StarIcon from '@mui/icons-material/Star';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 import Container from '@mui/material/Container';
-import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Checkbox from '@mui/material/Checkbox';
 import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemButton from '@mui/material/ListItemButton';
+import { Link } from "react-router-dom";
+import DummyBurgerData from './DummyBurgerData';
 
 
 
 export default function BurgerDetails() {
 
   const [ingredients, setIngredients] = useState([])
-  //const [selectedIngredients, setSelectedIngredients] = useState([]);
+  const [totalPrice, setTotalPrice] = useState(0);
 
   useEffect(() => {
     // Fetch data from the API endpoint
@@ -32,7 +32,9 @@ export default function BurgerDetails() {
       .then((result)=>{
         setIngredients(result);
       }
-    )
+    ).catch((error) => {
+      console.error('Error fetching ingredients:', error);
+    });
   }, [])
 
 
@@ -51,6 +53,29 @@ export default function BurgerDetails() {
 
     setChecked(newChecked);
   };
+
+
+  const burgerData = DummyBurgerData[0];
+
+  //---------------------
+  useEffect(() => {
+    // Calculate the total price of the burger
+    const ingredientPrices = checked.map((id) => {
+      const ingredient = ingredients.find((item) => item.id === id);
+      console.log('Ingredient:', ingredient);
+      return ingredient.price;
+    });
+    const totalPrice = burgerData.price + ingredientPrices.reduce((a, b) => a + b, 0);
+    setTotalPrice(totalPrice);
+  }, [checked, ingredients, burgerData]);
+
+  const handleAddToCart = () => {
+    // store burger name and total price in local storage
+    localStorage.setItem('burgerId', burgerData.id);
+    localStorage.setItem('burgerName', burgerData.title);
+    localStorage.setItem('totalPrice', totalPrice);
+  };
+  //--------------------
 
 
   return (
@@ -79,18 +104,18 @@ export default function BurgerDetails() {
         <CardMedia
           component="img"
           height= "auto"
-          image="beef burger.jpg"
+          image={burgerData.image}
           alt="Beef Burger"
         />
         <CardContent>
           <Typography gutterBottom variant="h4" color="text.secondary" component="div" sx={{ textAlign: 'center', fontWeight: 'bold' }}>
-            Beef Burger
+            {burgerData.title}
           </Typography>
           <Typography variant="body1" color="text.secondary"  sx={{ textAlign: 'center', fontWeight: 'medium' }}>
-            Flame-grilled beef patties with juicy tomatoes, crisp lettuce, creamy mayonnaise, ketchup, crunchy pickles, and sliced white onions on a toasted sesame seed bun
+            {burgerData.description}
           </Typography>
           <Typography variant="h5" sx={{ mt: 2, textAlign: 'center', fontWeight: 'bold' }}>
-            Rs. 1500
+            Rs. {burgerData.price}
           </Typography>
           <Button variant="outlined" color="success" startIcon={<StarIcon />} sx={{ mt: 5, color: '#33691e'}}>
             Add A Review
@@ -101,8 +126,6 @@ export default function BurgerDetails() {
     
 
     <Container>
-    
-
     
     <List
     sx={{
@@ -122,14 +145,14 @@ export default function BurgerDetails() {
     {ingredients.map(ingredient=>(
     <ListItem  key={ingredient.id}>
 
-    <ListItemButton role={undefined} onClick={handleToggle()} dense>
       <ListItemIcon>
         <Checkbox
           color="success"
           edge="end"
+          value={ingredient.id}
+          onClick={handleToggle(ingredient.id)}
         />
       </ListItemIcon>
-    </ListItemButton>
 
       <ListItemText
         primary={
@@ -156,13 +179,17 @@ export default function BurgerDetails() {
   ))
 }
 
-<Button variant="contained" color="success" startIcon={<ShoppingCartIcon/>} sx={{ mt: 26.5, mb: 3, bgcolor: '#33691e'}}>
-  Add To Cart
-</Button>
+  <Link to="/order">
 
-</List>
+    <Button variant="contained" color="success" startIcon={<ShoppingCartIcon/>} sx={{ mt: 26.5, mb: 3, bgcolor: '#33691e'}} onClick={handleAddToCart}>
+      Add To Cart
+    </Button>
 
-</Container>
+  </Link>
+
+  </List>
+
+  </Container>
 
   </Grid>
   );
